@@ -1,9 +1,14 @@
 import zope.component
+from zope.publisher.browser import BrowserPage
 from zope.browserpage.viewpagetemplatefile import ViewPageTemplateFile
 
 from Acquisition import aq_inner
 
+from pmr2.app.workspace.interfaces import IStorage
+from pmr2.app.exposure.interfaces import IExposureSourceAdapter
 from pmr2.app.exposure.browser.browser import ExposureFileViewBase
+
+from pmr2.opencmiss.api import to_threejs
 
 
 class BaseZincViewer(ExposureFileViewBase):
@@ -59,7 +64,37 @@ class JsonZincViewer(BaseZincViewer):
         return self._getPath(self.note.json)
 
 
-class FieldMLMetadata(ExposureFileViewBase):
+class ThreeJSViewer(BaseZincViewer):
+    """
+    threejs viewer class.
+    """
+
+    index = ViewPageTemplateFile('threejs_viewer.pt')
+
+    def src(self):
+        return '/'.join((self.context.absolute_url(), self.__name__,
+            'threejs'))
+
+    def render(self):
+        if self.url_subpath == 'threejs':
+            # XXX temporary, normally we have pre-generated data here
+            # but we can't due to possible storage requirements so we
+            # will have dedicated endpoints/servers for this which will
+            # need to be determined on exact implementation.  Proof of
+            # concept at this stage so this dummy endpoint will be
+            # removed.
+            esa = zope.component.getAdapter(self.context,
+                IExposureSourceAdapter)
+            e, workspace, n = esa.source()
+            storage = zope.component.getAdapter(workspace, IStorage)
+            # assume this is valid.
+            graphics_description = storage.file('graphics_descriptions')
+            region_data = esa.file()
+            return to_threejs(region_data, graphics_description)
+        return super(ThreeJSViewer, self).render()
+
+
+class FieldMLMetadata(BrowserPage):
     """\
     Wraps an object around the Zinc viewer.
     """

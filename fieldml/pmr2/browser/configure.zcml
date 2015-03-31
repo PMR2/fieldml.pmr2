@@ -19,6 +19,13 @@
 
   <browser:page
       for="pmr2.app.exposure.interfaces.IExposureFile"
+      name="threejs_viewer"
+      class=".view.ThreeJSViewer"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="pmr2.app.exposure.interfaces.IExposureFile"
       name="fieldml_metadata"
       class=".view.FieldMLMetadata"
       permission="zope2.View"
