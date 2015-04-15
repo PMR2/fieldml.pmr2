@@ -94,7 +94,7 @@ class ThreeJSViewer(BaseZincViewer):
         return super(ThreeJSViewer, self).render()
 
 
-class FieldMLMetadata(BrowserPage):
+class FieldMLMetadata(ExposureFileViewBase):
     """\
     Wraps an object around the Zinc viewer.
     """
