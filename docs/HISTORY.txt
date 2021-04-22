@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.9 - Released (2021-04-22)
+---------------------------
+
+* Include support for ZincJSGroupExporter
+
 0.8 - Released (2016-03-08)
 ---------------------------
 
