@@ -12,7 +12,7 @@ class FieldMLUtilityLayer(PloneSandboxLayer):
     def setUpZope(self, app, configurationContext):
         import fieldml.pmr2
         self.loadZCML(package=fieldml.pmr2)
-        z2.installProduct(app, 'fieldml.pmr2')
+        # z2.installProduct(app, 'fieldml.pmr2')
 
     def setUpPloneSite(self, portal):
         """
