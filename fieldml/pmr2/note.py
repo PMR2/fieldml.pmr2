@@ -46,3 +46,11 @@ class ScaffoldDescriptionNote(ExposureFileEditableNoteBase):
 
     zope.interface.implements(IScaffoldDescriptionNote)
     view_json = fieldproperty.FieldProperty(IScaffoldDescriptionNote['view_json'])
+
+
+class ScaffoldvuerNote(ExposureFileNoteBase):
+    """
+    Scaffoldvuer note.
+    """
+
+    zope.interface.implements(IScaffoldvuerNote)

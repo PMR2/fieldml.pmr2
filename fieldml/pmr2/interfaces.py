@@ -16,10 +16,23 @@ class ISettings(zope.interface.Interface):
         required=False,
     )
 
+    sparc_convert = zope.schema.TextLine(
+        title=u'Sparc Convert location',
+        description=u'The path to the sparc-convert binary.',
+        default=u'sparc-convert',
+        required=False,
+    )
+
 
 class IZincJSUtility(zope.interface.Interface):
     """
     The marker interface for the ZincJS utility.
+    """
+
+
+class ISparcConvertUtility(zope.interface.Interface):
+    """
+    The marker interface for the sparc-convert cli wrapper utility.
     """
 
 
@@ -98,3 +111,9 @@ class IScaffoldDescriptionNote(zope.interface.Interface):
         vocabulary='pmr2.vocab.manifest',
         required=False,
     )
+
+
+class IScaffoldvuerNote(zope.interface.Interface):
+    """
+    Scaffoldvuer note.
+    """

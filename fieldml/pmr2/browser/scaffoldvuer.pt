@@ -1,0 +1,41 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      metal:use-macro="context/@@pmr2-z3cform-macros/main">
+
+<metal:slot metal:fill-slot="style_slot" i18n:domain="fieldml.pmr2">
+  <style type="text/css"
+      tal:content="string:@import url($portal_url/++resource++fieldml.pmr2.css/zinc.css);">
+  </style>
+</metal:slot>
+
+<metal:slot metal:fill-slot="javascript_head_slot" 
+    i18n:domain="fieldml.pmr2">
+  <script type="text/javascript" src="https://unpkg.com/vue"></script>
+  <script type="text/javascript"
+      tal:attributes="src string:$portal_url/++resource++fieldml.pmr2.js/scaffoldvuer-wc.umd.min.js">
+  </script>
+  <script type="text/javascript"
+      tal:attributes="src string:$portal_url/++resource++fieldml.pmr2.js/zincjs_pmr2_helper.js">
+  </script>
+</metal:slot>
+
+<body>
+
+<metal:slot metal:fill-slot="main" i18n:domain="cmf_default">
+  <div id="layout-contents">
+    <div class="pmr2_zincjs_wrapper">
+    <div class="pmr2_zincjs_control"><i class="icon-resize-full"></i> (toggle viewer size)</div>
+    <h1>Scaffold Viewer</h1>
+    <div id="MAPcorePortalArea">
+    <scaffoldvuer-wc tal:attributes="
+        url string:${view/url_expr}/ArgonSceneExporter_metadata.json;
+    "></scaffoldvuer-wc>
+    </div>
+    </div>
+  </div>
+</metal:slot>
+
+</body>
+</html>

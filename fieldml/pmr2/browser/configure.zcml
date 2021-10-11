@@ -31,6 +31,13 @@
       permission="zope2.View"
       />
 
+  <browser:page
+      for="pmr2.app.exposure.interfaces.IExposureFile"
+      name="scaffoldvuer"
+      class=".view.ScaffoldvuerView"
+      permission="zope2.View"
+      />
+
   <browser:resourceDirectory
       name="fieldml.pmr2.css"
       directory="css"

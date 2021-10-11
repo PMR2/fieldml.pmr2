@@ -11,6 +11,8 @@ from pmr2.app.factory import named_factory
 from pmr2.app.settings.interfaces import IPMR2GlobalSettings
 from pmr2.app.annotation.interfaces import *
 from pmr2.app.annotation.annotator import ExposureFileAnnotatorBase
+from pmr2.app.exposure.interfaces import IExposureSourceAdapter
+from pmr2.app.workspace.interfaces import IStorage
 
 from fieldml.pmr2.interfaces import *
 from fieldml.pmr2.rdf import RdfExposureNoteHelper
@@ -88,3 +90,31 @@ class ScaffoldDescriptionAnnotator(ExposureFileAnnotatorBase):
         return ()
 
 ScaffoldDescriptionAnnotatorFactory = named_factory(ScaffoldDescriptionAnnotator)
+
+
+class ScaffoldvuerAnnotator(ExposureFileAnnotatorBase):
+    zope.interface.implements(IExposureFileAnnotator)
+    for_interface = IScaffoldDescriptionNote
+    title = u'Scaffoldvuer'
+    label = u'Scaffoldvuer Renderer'
+
+    def generate(self):
+        settings = zope.component.queryUtility(IPMR2GlobalSettings)
+        root = settings.dirOf(self.context)
+        scaffold_root = join(root, self.__name__)
+        if not isdir(root):
+            makedirs(root)
+        if exists(scaffold_root):
+            rmtree(scaffold_root)
+        makedirs(scaffold_root)
+
+        helper = zope.component.queryAdapter(
+            self.context, IExposureSourceAdapter)
+        exposure, workspace, path = helper.source()
+        storage = IStorage(exposure)
+
+        utility = zope.component.queryUtility(ISparcConvertUtility)
+        utility(scaffold_root, storage, self.input)
+        return ()
+
+ScaffoldvuerAnnotatorFactory = named_factory(ScaffoldvuerAnnotator)

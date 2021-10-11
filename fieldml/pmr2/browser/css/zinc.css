@@ -10,6 +10,8 @@
 
 #MAPcorePortalArea {
     height: 100%;
+    z-index: 1000;
+    position: relative;
 }
 
 .pmr2_zincjs_wrapper {

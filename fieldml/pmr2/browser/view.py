@@ -120,3 +120,25 @@ class ScaffoldViewer(ExposureFileViewBase):
             raise NotFound(self.context, self.context.title_or_id())
         with open(target) as fd:
             return fd.read()
+
+
+class ScaffoldvuerView(ExposureFileViewBase):
+    """
+    The scaffoldvuer view
+    """
+
+    index = ViewPageTemplateFile('scaffoldvuer.pt')
+
+    def render(self):
+        if not self.traverse_subpath:
+            return super(ScaffoldvuerView, self).render()
+
+        settings = zope.component.getUtility(IPMR2GlobalSettings)
+        root = join(realpath(settings.dirOf(self.context)), self.__name__)
+        target = realpath(join(root, *self.traverse_subpath))
+        if commonprefix([root, target]) != root:
+            raise NotFound(self.context, self.context.title_or_id())
+        if not isfile(target):
+            raise NotFound(self.context, self.context.title_or_id())
+        with open(target) as fd:
+            return fd.read()
