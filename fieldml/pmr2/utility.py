@@ -53,14 +53,20 @@ class ZincJSUtility(object):
 class SparcConvertUtility(object):
 
     def get_paths(self, neon_input):
-        try:
-            neon_doc = json.loads(neon_input)
-            # watch out for absolute paths
-            return [
-                source['FileName']
-                for source in neon_doc['RootRegion']['Model']['Sources']
+        def get_region_model_sources(region):
+            sources = region.get('Model', {}).get('Sources', [])
+            results = [
+                source['FileName'] for source in sources
                 if source['Type'] == 'FILE'
             ]
+            for child in region.get('ChildRegions', []):
+                results.extend(get_region_model_sources(child))
+            return results
+
+        try:
+            neon_doc = json.loads(neon_input)
+            return get_region_model_sources(neon_doc['RootRegion'])
+            # watch out for absolute paths
         except (KeyError, TypeError, ValueError, AttributeError):
             return []
 
