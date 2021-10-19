@@ -19,6 +19,7 @@ from Products.CMFCore.utils import getToolByName
 from pmr2.app.settings.interfaces import IPMR2GlobalSettings
 from pmr2.app.workspace.content import Workspace
 from pmr2.app.workspace.interfaces import IStorageUtility
+from pmr2.app.workspace.interfaces import IStorage
 from pmr2.app.exposure.interfaces import IExposureFile
 from pmr2.app.exposure.content import ExposureFile
 from pmr2.app.exposure.content import Exposure
@@ -283,12 +284,12 @@ class UtilsTestCase(unittest.TestCase):
                         "Model": {
                           "Sources": [
                             {
-                              "FileName": "source2.exnode",
+                              "FileName": "src/source2.exnode",
                               "RegionName": "/source2",
                               "Type": "FILE"
                             },
                             {
-                              "FileName": "source2.exelem",
+                              "FileName": "src/source2.exelem",
                               "RegionName": "/source2",
                               "Type": "FILE"
                             }
@@ -320,8 +321,23 @@ class UtilsTestCase(unittest.TestCase):
 
         self.assertEqual(paths, {
             'source1.exnode', 'source1.exelem',
-            'source2.exnode', 'source2.exelem',
+            'src/source2.exnode', 'src/source2.exelem',
         })
+
+        su = zope.component.getUtility(IStorageUtility, name='dummy_storage')
+        su._dummy_storage_data['fake'] = [{
+            'source1.exnode': 'source1.exnode',
+            'src/source2.exnode': 'source2.exnode',
+            'source1.exelem': 'source1.exelem',
+            'src/source2.exelem': 'source2.exelem',
+        }]
+        w = Workspace('fake')
+        w.storage = 'dummy_storage'
+        storage = IStorage(w)
+
+        utility.extract_paths(self.testdir, storage, paths)
+        with open(join(self.testdir, 'src', 'source2.exelem')) as fd:
+            self.assertEqual(fd.read(), 'source2.exelem')
 
     @unittest.skipIf(
         'SPARC_CONVERT_BIN' not in os.environ,

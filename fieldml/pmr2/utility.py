@@ -70,6 +70,17 @@ class SparcConvertUtility(object):
         except (KeyError, TypeError, ValueError, AttributeError):
             return []
 
+    def extract_paths(self, rootdir, storage, paths):
+        # write out the data for each of the referenced paths
+        for path in paths:
+            # assume data can only be returned if the path is a proper
+            # partial path
+            data = storage.file(path)
+            fullpath = join(rootdir, path)
+            if not isdir(dirname(fullpath)):
+                os.makedirs(dirname(fullpath))
+            with open(fullpath, 'wb') as fd:
+                fd.write(data)
 
     def __call__(self, working_dir, storage, neon_input):
         registry = zope.component.getUtility(IRegistry)
@@ -104,16 +115,7 @@ class SparcConvertUtility(object):
         with open(neon_path, 'w') as fd:
             fd.write(neon_input)
 
-        # write out the data for each of the referenced paths
-        for path in paths:
-            # assume data can only be returned if the path is a proper
-            # partial path
-            data = storage.file(path)
-            fullpath = join(tmpdir, path)
-            if not isdir(dirname(fullpath)):
-                os.makedirs(dirname(fullpath))
-            with open(fullpath, 'wb') as fd:
-                fd.write(data)
+        self.extract_paths(tmpdir, storage, paths)
 
         # then invoke the process;
         # restrict env to just the bare minimum, i.e. don't let things
