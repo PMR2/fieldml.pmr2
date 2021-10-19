@@ -31,15 +31,25 @@ from pmr2.app.annotation.interfaces import IExposureFileAnnotator
 
 from pmr2.testing.base import TestRequest
 
+from fieldml.pmr2.interfaces import ISparcConvertUtility
 from fieldml.pmr2.interfaces import IZincJSUtility
 from fieldml.pmr2.interfaces import ISettings
+from fieldml.pmr2.utility import SparcConvertUtility
 from fieldml.pmr2.utility import ZincJSUtility
 from fieldml.pmr2.testing import layer
 from fieldml.pmr2.browser.view import ScaffoldViewer
+from fieldml.pmr2.browser.view import ScaffoldvuerView
 
 
 with gzip_open(join(dirname(__file__), 'input', 'test.ex2.gz')) as fd:
     test_exfile_content = fd.read()
+
+
+neon_files = {}
+
+for fn in ['CubeSquareLine.neon', 'cubesquareline_sml.exf']:
+    with open(join(dirname(__file__), 'input', fn)) as fd:
+        neon_files[fn] = fd.read()
 
 
 class UtilsTestCase(unittest.TestCase):
@@ -64,12 +74,14 @@ class UtilsTestCase(unittest.TestCase):
         rmtree(self.testdir)
         self.logger.removeHandler(self.handler)
 
-    def test_zincjs_settings(self):
+    def test_settings(self):
         registry = zope.component.getUtility(IRegistry)
         settings = registry.forInterface(
             ISettings, prefix='fieldml.pmr2.settings')
         self.assertEqual(
             settings.zincjs_group_exporter, 'zincjs_group_exporter')
+        self.assertEqual(
+            settings.sparc_convert, 'sparc-convert')
 
     def test_zincjs_utility_registered(self):
         utility = zope.component.queryUtility(IZincJSUtility)
@@ -227,3 +239,86 @@ class UtilsTestCase(unittest.TestCase):
             'http://nohost/plone/workspace/scaffold/@@rawfile/0/view.json',
             view(),
         )
+
+    def test_sparc_convert_registered(self):
+        utility = zope.component.queryUtility(ISparcConvertUtility)
+        self.assertTrue(isinstance(utility, SparcConvertUtility))
+
+    def test_sparc_utility_usage_without_binary(self):
+        utility = zope.component.queryUtility(ISparcConvertUtility)
+        utility(self.testdir, None, '')
+
+        self.assertIn(
+            'unable to find the sparc-convert binary',
+            self.stream.getvalue()
+        )
+
+    @unittest.skipIf(
+        'SPARC_CONVERT_BIN' not in os.environ,
+        'define SPARC_CONVERT_BIN environment variable to run full '
+        'integration test')
+    def test_sparc_convert_full(self):
+        wid = 'cubesquare'
+        fid = 'CubeSquareLine.neon'
+        pmr2_settings = zope.component.getUtility(IPMR2GlobalSettings)
+        pmr2_settings.repo_root = self.testdir
+
+        registry = zope.component.getUtility(IRegistry)
+        utility = zope.component.queryUtility(ISparcConvertUtility)
+        settings = registry.forInterface(
+            ISettings, prefix='fieldml.pmr2.settings')
+        settings.sparc_convert = os.environ[
+            'SPARC_CONVERT_BIN'].decode('utf8')
+
+        su = zope.component.getUtility(IStorageUtility, name='dummy_storage')
+        su._dummy_storage_data[wid] = [neon_files]
+
+        w = Workspace(wid)
+        w.storage = 'dummy_storage'
+        self.portal.workspace[wid] = w
+
+        exposure = Exposure(wid)
+        exposure.commit_id = u'0'
+        exposure.workspace = u'/plone/workspace/%s' % wid
+
+        self.portal.exposure[wid] = exposure
+        self.portal.exposure[wid][fid] = ExposureFile(fid)
+
+        context = self.portal.exposure[wid][fid]
+        request = TestRequest()
+        annotator = zope.component.getUtility(IExposureFileAnnotator,
+            name='scaffoldvuer')(context, request)
+        annotator(data=())
+
+        out_root = join(self.testdir, 'plone', 'exposure', wid, fid)
+        self.assertTrue(isdir(out_root))
+
+        # skip the neon file.
+        fn = 'cubesquareline_sml.exf'
+        with open(join(out_root, 'scaffoldvuer', 'src', fn)) as fd:
+            self.assertEqual(fd.read(), neon_files[fn])
+
+        # TODO try a test with testbrowser
+        request = self.layer['portal'].REQUEST
+        view = ScaffoldvuerView(context, request)
+        # have to manually set view name as it was not adapted
+        view.__name__ = 'scaffoldvuer'
+        base_render = view()
+        self.assertIn('MAPcorePortalArea', base_render)
+
+        # get the root view
+        entry = 'ArgonSceneExporter_view.json'
+        view.publishTraverse(request, entry)
+        root_json = view()
+        with open(join(out_root, 'scaffoldvuer', entry)) as fd:
+            contents = fd.read()
+            self.assertEqual(contents, root_json)
+            self.assertTrue(isinstance(loads(root_json), dict))
+
+        # destroy that file and recreate
+        with open(join(out_root, 'scaffoldvuer', entry), 'w') as fd:
+            fd.write('???')
+
+        # this should break the view
+        with self.assertRaises(ValueError):
+            loads(view())

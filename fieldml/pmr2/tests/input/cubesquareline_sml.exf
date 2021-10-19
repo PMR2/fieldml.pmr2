@@ -1,0 +1,225 @@
+EX Version: 2
+Region: /
+!#nodeset nodes
+Shape. Dimension=0
+#Fields=1
+1) coordinates, coordinate, rectangular cartesian, real, #Components=3
+ x. #Values=1 (value)
+ y. #Values=1 (value)
+ z. #Values=1 (value)
+Node: 1
+  1.000000000000000e-01
+  2.000000000000000e-01
+  1.000000000000000e-01
+Node: 2
+  7.000000000000000e-01
+  2.000000000000000e-01
+  1.000000000000000e-01
+Node: 3
+  1.000000000000000e-01
+  8.000000000000000e-01
+  1.000000000000000e-01
+Node: 4
+  7.000000000000000e-01
+  8.000000000000000e-01
+  1.000000000000000e-01
+Node: 5
+  1.000000000000000e-01
+  2.000000000000000e-01
+  7.000000000000000e-01
+Node: 6
+  7.000000000000000e-01
+  2.000000000000000e-01
+  7.000000000000000e-01
+Node: 7
+  1.000000000000000e-01
+  8.000000000000000e-01
+  7.000000000000000e-01
+Node: 8
+  7.000000000000000e-01
+  8.000000000000000e-01
+  7.000000000000000e-01
+Node: 9
+  1.300000000000000e+00
+  2.000000000000000e-01
+  1.000000000000000e-01
+Node: 10
+  1.300000000000000e+00
+  8.000000000000000e-01
+  1.000000000000000e-01
+Node: 11
+  1.900000000000000e+00
+  2.000000000000000e-01
+  1.000000000000000e-01
+!#mesh mesh1d, dimension=1, nodeset=nodes
+Shape. Dimension=1, line
+#Scale factor sets=0
+#Nodes=0
+#Fields=0
+Element: 1
+Element: 2
+Element: 3
+Element: 4
+Element: 5
+Element: 6
+Element: 7
+Element: 8
+Element: 9
+Element: 10
+Element: 11
+Element: 12
+Element: 13
+Element: 14
+Element: 15
+#Scale factor sets=0
+#Nodes=2
+#Fields=1
+1) coordinates, coordinate, rectangular cartesian, real, #Components=3
+ x. l.Lagrange, no modify, standard node based.
+  #Nodes=2
+  1. #Values=1
+   Value labels: value
+  2. #Values=1
+   Value labels: value
+ y. l.Lagrange, no modify, standard node based.
+  #Nodes=2
+  1. #Values=1
+   Value labels: value
+  2. #Values=1
+   Value labels: value
+ z. l.Lagrange, no modify, standard node based.
+  #Nodes=2
+  1. #Values=1
+   Value labels: value
+  2. #Values=1
+   Value labels: value
+Element: 16
+ Nodes:
+ 9 11
+!#mesh mesh2d, dimension=2, face mesh=mesh1d, nodeset=nodes
+Shape. Dimension=2, line*line
+#Scale factor sets=0
+#Nodes=0
+#Fields=0
+Element: 1
+ Faces:
+ 3 7 2 10
+Element: 2
+ Faces:
+ 5 8 4 11
+Element: 3
+ Faces:
+ 1 9 3 5
+Element: 4
+ Faces:
+ 6 12 7 8
+Element: 5
+ Faces:
+ 2 4 1 6
+Element: 6
+ Faces:
+ 10 11 9 12
+#Scale factor sets=0
+#Nodes=4
+#Fields=1
+1) coordinates, coordinate, rectangular cartesian, real, #Components=3
+ x. l.Lagrange*l.Lagrange, no modify, standard node based.
+  #Nodes=4
+  1. #Values=1
+   Value labels: value
+  2. #Values=1
+   Value labels: value
+  3. #Values=1
+   Value labels: value
+  4. #Values=1
+   Value labels: value
+ y. l.Lagrange*l.Lagrange, no modify, standard node based.
+  #Nodes=4
+  1. #Values=1
+   Value labels: value
+  2. #Values=1
+   Value labels: value
+  3. #Values=1
+   Value labels: value
+  4. #Values=1
+   Value labels: value
+ z. l.Lagrange*l.Lagrange, no modify, standard node based.
+  #Nodes=4
+  1. #Values=1
+   Value labels: value
+  2. #Values=1
+   Value labels: value
+  3. #Values=1
+   Value labels: value
+  4. #Values=1
+   Value labels: value
+Element: 7
+ Faces:
+ 4 13 14 15
+ Nodes:
+ 2 9 4 10
+!#mesh mesh3d, dimension=3, face mesh=mesh2d, nodeset=nodes
+Shape. Dimension=3, line*line*line
+#Scale factor sets=0
+#Nodes=8
+#Fields=1
+1) coordinates, coordinate, rectangular cartesian, real, #Components=3
+ x. l.Lagrange*l.Lagrange*l.Lagrange, no modify, standard node based.
+  #Nodes=8
+  1. #Values=1
+   Value labels: value
+  2. #Values=1
+   Value labels: value
+  3. #Values=1
+   Value labels: value
+  4. #Values=1
+   Value labels: value
+  5. #Values=1
+   Value labels: value
+  6. #Values=1
+   Value labels: value
+  7. #Values=1
+   Value labels: value
+  8. #Values=1
+   Value labels: value
+ y. l.Lagrange*l.Lagrange*l.Lagrange, no modify, standard node based.
+  #Nodes=8
+  1. #Values=1
+   Value labels: value
+  2. #Values=1
+   Value labels: value
+  3. #Values=1
+   Value labels: value
+  4. #Values=1
+   Value labels: value
+  5. #Values=1
+   Value labels: value
+  6. #Values=1
+   Value labels: value
+  7. #Values=1
+   Value labels: value
+  8. #Values=1
+   Value labels: value
+ z. l.Lagrange*l.Lagrange*l.Lagrange, no modify, standard node based.
+  #Nodes=8
+  1. #Values=1
+   Value labels: value
+  2. #Values=1
+   Value labels: value
+  3. #Values=1
+   Value labels: value
+  4. #Values=1
+   Value labels: value
+  5. #Values=1
+   Value labels: value
+  6. #Values=1
+   Value labels: value
+  7. #Values=1
+   Value labels: value
+  8. #Values=1
+   Value labels: value
+Element: 1
+ Faces:
+ 1 2 3 4 5 6
+ Nodes:
+ 1 2 3 4 5 6 7 8
