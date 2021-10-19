@@ -55,12 +55,12 @@ class SparcConvertUtility(object):
     def get_paths(self, neon_input):
         def get_region_model_sources(region):
             sources = region.get('Model', {}).get('Sources', [])
-            results = [
+            results = {
                 source['FileName'] for source in sources
                 if source['Type'] == 'FILE'
-            ]
+            }
             for child in region.get('ChildRegions', []):
-                results.extend(get_region_model_sources(child))
+                results.update(get_region_model_sources(child))
             return results
 
         try:

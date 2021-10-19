@@ -253,6 +253,76 @@ class UtilsTestCase(unittest.TestCase):
             self.stream.getvalue()
         )
 
+    def test_sparc_utility_get_paths(self):
+        utility = zope.component.queryUtility(ISparcConvertUtility)
+        paths = utility.get_paths("""
+        {
+          "RootRegion": {
+            "ChildRegions": [
+              {
+                "ChildRegions": [
+                  {
+                    "ChildRegions": [
+                      {
+                        "Model": {
+                          "Sources": [
+                            {
+                              "FileName": "source1.exnode",
+                              "RegionName": "/source1",
+                              "Type": "FILE"
+                            },
+                            {
+                              "FileName": "source1.exelem",
+                              "RegionName": "/source1",
+                              "Type": "FILE"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Model": {
+                          "Sources": [
+                            {
+                              "FileName": "source2.exnode",
+                              "RegionName": "/source2",
+                              "Type": "FILE"
+                            },
+                            {
+                              "FileName": "source2.exelem",
+                              "RegionName": "/source2",
+                              "Type": "FILE"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "Model": {
+                      "Sources": [
+                        {
+                          "FileName": "source1.exnode",
+                          "RegionName": "/source1",
+                          "Type": "FILE"
+                        },
+                        {
+                          "FileName": "source1.exelem",
+                          "RegionName": "/source1",
+                          "Type": "FILE"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """)
+
+        self.assertEqual(paths, {
+            'source1.exnode', 'source1.exelem',
+            'source2.exnode', 'source2.exelem',
+        })
+
     @unittest.skipIf(
         'SPARC_CONVERT_BIN' not in os.environ,
         'define SPARC_CONVERT_BIN environment variable to run full '
