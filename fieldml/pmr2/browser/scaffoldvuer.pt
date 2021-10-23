@@ -30,7 +30,7 @@
     <h1>Scaffold Viewer</h1>
     <div id="MAPcorePortalArea">
     <scaffoldvuer-wc tal:attributes="
-        url string:${view/url_expr}/ArgonSceneExporter_metadata.json;
+        url string:${view/url_expr}/ArgonSceneExporterWebGL_metadata.json;
     "></scaffoldvuer-wc>
     </div>
     </div>
