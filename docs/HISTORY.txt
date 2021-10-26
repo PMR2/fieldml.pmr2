@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.10 - Released (2021-10-26)
+----------------------------
+
+* Include support for sparc-export
+* Include the scaffoldvuer webcomponent for the rendering of the
+  exported neon files through sparc-export.
+
 0.9 - Released (2021-04-22)
 ---------------------------
 
