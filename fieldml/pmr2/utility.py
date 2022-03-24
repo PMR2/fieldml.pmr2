@@ -11,12 +11,16 @@ import zope.interface
 
 from plone.registry.interfaces import IRegistry
 
-from fieldml.pmr2.interfaces import IZincJSUtility
-from fieldml.pmr2.interfaces import ISparcConvertUtility
-from fieldml.pmr2.interfaces import ISettings
+from fieldml.pmr2.interfaces import (
+    IZincJSUtility,
+    ISparcConvertUtility,
+    ISparcDatasetToolsUtility,
+    ISettings,
+)
 
 logger = getLogger(__name__)
 prefix = 'fieldml.pmr2.settings'
+settings_json_path = join(dirname(__file__), 'mesh_generator-settings.json')
 
 
 @zope.interface.implementer(IZincJSUtility)
@@ -148,3 +152,32 @@ class SparcConvertUtility(SparcUtilityBase):
 
     def call(self, executable, sparc_path, env, working_dir, **kw):
         call([executable, 'web-gl', sparc_path], env=env, cwd=working_dir)
+
+
+@zope.interface.implementer(ISparcDatasetToolsUtility)
+class SparcDatasetToolsUtility(SparcUtilityBase):
+    """
+    The sparc-dataset-tools utility
+    """
+
+    executable_key = 'create_scaffold_dataset'
+    binary_name = 'create-scaffold-dataset'
+    sparc_filename = 'input.argon'
+
+    def call(self, executable, sparc_path, env, working_dir, **kw):
+        # FIXME this block is a workaround for the underlying tool
+        xenv = {'DISPLAY': ':0'}
+        xenv.update(env)
+        env = xenv
+
+        # assuming it was created already
+        tmpdir = join(working_dir, 'src')
+
+        # TODO if a custom settings_file be specified, load it from
+        # dict(self.data)['settings_file'] and write it out.
+        # settings_json_path = join(tmpdir, 'mesh_generator-settings.json')
+
+        call(
+            [executable, working_dir, settings_json_path, sparc_path],
+            env=env, cwd=working_dir,
+        )

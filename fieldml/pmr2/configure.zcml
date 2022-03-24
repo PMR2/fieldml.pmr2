@@ -43,6 +43,13 @@
       name="scaffoldvuer"
       />
 
+  <adapter
+      for="pmr2.app.exposure.interfaces.IExposureFile"
+      factory=".ArgonSDSArchiveNoteFactory"
+      provides="fieldml.pmr2.interfaces.IArgonSDSArchiveNote"
+      name="argon_sds_archive"
+      />
+
   <!-- Note Generation -->
 
   <utility
@@ -75,6 +82,12 @@
       provides="pmr2.app.annotation.interfaces.IExposureFileAnnotator"
       />
 
+  <utility
+      name="argon_sds_archive"
+      component=".annotator.ArgonSDSArchiveAnnotatorFactory"
+      provides="pmr2.app.annotation.interfaces.IExposureFileAnnotator"
+      />
+
   <!-- Supporting utilities -->
 
   <utility
@@ -85,6 +98,11 @@
   <utility
       factory=".utility.SparcConvertUtility"
       provides="fieldml.pmr2.interfaces.ISparcConvertUtility"
+      />
+
+  <utility
+      factory=".utility.SparcDatasetToolsUtility"
+      provides="fieldml.pmr2.interfaces.ISparcDatasetToolsUtility"
       />
 
 </configure>

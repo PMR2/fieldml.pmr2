@@ -118,3 +118,31 @@ class ScaffoldvuerAnnotator(ExposureFileAnnotatorBase):
         return ()
 
 ScaffoldvuerAnnotatorFactory = named_factory(ScaffoldvuerAnnotator)
+
+
+class ArgonSDSArchiveAnnotator(ExposureFileAnnotatorBase):
+    zope.interface.implements(IExposureFileAnnotator)
+    for_interface = IArgonSDSArchiveNote
+    title = u'Argon SDS Archive'
+    label = u'Argon SDS Archive Annotator'
+
+    def generate(self):
+        settings = zope.component.queryUtility(IPMR2GlobalSettings)
+        root = settings.dirOf(self.context)
+        archive_root = join(root, self.__name__)
+        if not isdir(root):
+            makedirs(root)
+        if exists(archive_root):
+            rmtree(archive_root)
+        makedirs(archive_root)
+
+        helper = zope.component.queryAdapter(
+            self.context, IExposureSourceAdapter)
+        exposure, workspace, path = helper.source()
+        storage = IStorage(exposure)
+
+        utility = zope.component.queryUtility(ISparcDatasetToolsUtility)
+        utility(archive_root, storage, self.input)
+        return ()
+
+ArgonSDSArchiveAnnotatorFactory = named_factory(ArgonSDSArchiveAnnotator)
