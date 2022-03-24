@@ -393,13 +393,13 @@ class UtilsTestCase(unittest.TestCase):
         self.assertIn('MAPcorePortalArea', base_render)
 
         # get the root view
-        entry = 'ArgonSceneExporter_view.json'
+        entry = 'ArgonSceneExporterWebGL_metadata.json'
         view.publishTraverse(request, entry)
         root_json = view()
         with open(join(out_root, 'scaffoldvuer', entry)) as fd:
             contents = fd.read()
             self.assertEqual(contents, root_json)
-            self.assertTrue(isinstance(loads(root_json), dict))
+            self.assertTrue(isinstance(loads(root_json), list))
 
         # destroy that file and recreate
         with open(join(out_root, 'scaffoldvuer', entry), 'w') as fd:
