@@ -123,8 +123,8 @@ ScaffoldvuerAnnotatorFactory = named_factory(ScaffoldvuerAnnotator)
 class ArgonSDSArchiveAnnotator(ExposureFileAnnotatorBase):
     zope.interface.implements(IExposureFileAnnotator)
     for_interface = IArgonSDSArchiveNote
-    title = u'Argon SDS Archive'
-    label = u'Argon SDS Archive Annotator'
+    title = u'Argon SDS Archive Annotator'
+    label = u'Argon SDS Archive'
 
     def generate(self):
         settings = zope.component.queryUtility(IPMR2GlobalSettings)

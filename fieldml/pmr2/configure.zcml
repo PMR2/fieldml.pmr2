@@ -91,6 +91,12 @@
   <!-- Supporting utilities -->
 
   <utility
+      provides="pmr2.app.exposure.interfaces.IExposureDownloadTool"
+      factory=".utility.ArgonSDSArchiveDownloadTool"
+      name="argon_sds_archive"
+      />
+
+  <utility
       factory=".utility.ZincJSUtility"
       provides="fieldml.pmr2.interfaces.IZincJSUtility"
       />

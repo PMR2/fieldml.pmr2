@@ -1,6 +1,9 @@
 import os
 import json
-from os.path import join, dirname, isdir
+import zipfile
+from io import BytesIO
+from os import walk
+from os.path import join, dirname, isdir, relpath, sep
 from shutil import rmtree
 from subprocess import Popen, PIPE, call
 from logging import getLogger
@@ -10,6 +13,8 @@ import zope.component
 import zope.interface
 
 from plone.registry.interfaces import IRegistry
+from pmr2.app.annotation.factory import has_note
+from pmr2.app.exposure.interfaces import IExposureDownloadTool
 
 from fieldml.pmr2.interfaces import (
     IZincJSUtility,
@@ -21,6 +26,55 @@ from fieldml.pmr2.interfaces import (
 logger = getLogger(__name__)
 prefix = 'fieldml.pmr2.settings'
 settings_json_path = join(dirname(__file__), 'mesh_generator-settings.json')
+
+
+def _find(root):
+    for dirname, dnames, fnames in walk(root):
+        for fname in fnames:
+            fullpath = join(dirname, fname)
+            yield relpath(fullpath, root), fullpath
+        for dname in dnames:
+            fullpath = join(dirname, dname)
+            yield relpath(fullpath, root) + sep, fullpath
+
+
+def _create_zip(root):
+    stream = BytesIO()
+    zf = zipfile.ZipFile(stream, mode='w')
+
+    for path, fullpath in _find(root):
+        znfo = zipfile.ZipInfo(path)
+        if isdir(fullpath):
+            contents = ''
+        else:
+            znfo.compress_type = zipfile.ZIP_DEFLATED
+            with open(fullpath) as fd:
+                contents = fd.read()
+        znfo.file_size = len(contents)
+        znfo.external_attr = 0o777 << 16L
+        zf.writestr(znfo, contents)
+    zf.close()
+    return stream.getvalue()
+
+
+@zope.interface.implementer(IExposureDownloadTool)
+class ArgonSDSArchiveDownloadTool(object):
+    """
+    Argon SDS Download link
+    """
+
+    label = u'Argon SDS Archive'
+    suffix = '.zip'
+    mimetype = 'application/zip'
+
+    def get_download_link(self, exposure_object):
+        if not has_note(exposure_object, 'argon_sds_archive'):
+            return
+        return exposure_object.absolute_url() + '/argon_sds_archive/download'
+
+    def download(self, exposure_object, request):
+        # Implemented in the view
+        pass
 
 
 @zope.interface.implementer(IZincJSUtility)
