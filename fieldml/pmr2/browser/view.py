@@ -129,11 +129,14 @@ class ScaffoldvuerView(ExposureFileViewBase):
     """
 
     index = ViewPageTemplateFile('scaffoldvuer.pt')
+    metadata_json = 'ArgonSceneExporterWebGL_metadata.json'
 
     def render(self):
         if not self.traverse_subpath:
             return super(ScaffoldvuerView, self).render()
+        return self.render_path()
 
+    def render_path(self):
         settings = zope.component.getUtility(IPMR2GlobalSettings)
         root = join(realpath(settings.dirOf(self.context)), self.__name__)
         target = realpath(join(root, *self.traverse_subpath))
@@ -143,6 +146,23 @@ class ScaffoldvuerView(ExposureFileViewBase):
             raise NotFound(self.context, self.context.title_or_id())
         with open(target) as fd:
             return fd.read()
+
+
+class ArgonSDSArchiveScaffoldvuerView(ScaffoldvuerView):
+
+    metadata_json = 'derivative/Scaffold/scaffold_metadata.json'
+
+    def render(self):
+        if self.traverse_subpath and self.traverse_subpath[0] == 'download':
+            settings = zope.component.getUtility(IPMR2GlobalSettings)
+            root = join(realpath(settings.dirOf(self.context)), self.__name__)
+            content = _create_zip(root)
+            self.request.response.setHeader('Content-Type', 'application/zip')
+            self.request.response.setHeader('Content-Length', len(content))
+            self.request.response.setHeader('Content-Disposition',
+                'attachment; filename="%s.sds_export.zip"' % self.context.id)
+            return content
+        return super(ArgonSDSArchiveScaffoldvuerView, self).render()
 
 
 class ArgonSDSArchiveView(ExposureFileViewBase):

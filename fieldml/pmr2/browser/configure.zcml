@@ -41,7 +41,7 @@
   <browser:page
       for="pmr2.app.exposure.interfaces.IExposureFile"
       name="argon_sds_archive"
-      class=".view.ArgonSDSArchiveView"
+      class=".view.ArgonSDSArchiveScaffoldvuerView"
       permission="zope2.View"
       />
 
