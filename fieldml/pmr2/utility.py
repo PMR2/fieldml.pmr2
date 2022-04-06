@@ -219,11 +219,6 @@ class SparcDatasetToolsUtility(SparcUtilityBase):
     sparc_filename = 'input.argon'
 
     def call(self, executable, sparc_path, env, working_dir, **kw):
-        # FIXME this block is a workaround for the underlying tool
-        xenv = {'DISPLAY': ':0'}
-        xenv.update(env)
-        env = xenv
-
         # assuming it was created already
         tmpdir = join(working_dir, 'src')
 
