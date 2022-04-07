@@ -146,7 +146,7 @@ class SparcUtilityBase(object):
                 fd.write(data)
 
     def __call__(
-            self, working_dir, storage, sparc_input, rmtree_tmp=False, **kw):
+            self, working_dir, temp_dir, storage, sparc_input, **kw):
         registry = zope.component.getUtility(IRegistry)
         try:
             settings = registry.forInterface(ISettings, prefix=prefix)
@@ -170,30 +170,21 @@ class SparcUtilityBase(object):
         # figure out what paths to extract
         paths = self.get_paths(sparc_input)
 
-        # create a temporary directory in working_dir to write out; this
-        # is currently done in the working_dir which is assumed to be
-        # freshly created by the caller of this function.
-        tmpdir = join(working_dir, 'src')
-        os.mkdir(tmpdir)  # so this should always succeed
         # the sparc related file
-        sparc_path = join(tmpdir, self.sparc_filename)
+        sparc_path = join(temp_dir, self.sparc_filename)
         with open(sparc_path, 'w') as fd:
             fd.write(sparc_input)
 
-        self.extract_paths(tmpdir, storage, paths)
+        self.extract_paths(temp_dir, storage, paths)
 
         # restrict env to just the bare minimum, i.e. don't let things
         # like PYTHONPATH (if set) to interfere with the calling.
         env = {k: os.environ[k] for k in ('PATH',)}
 
         # then invoke the process;
-        self.call(executable, sparc_path, env, working_dir, **kw)
+        self.call(executable, sparc_path, env, working_dir, temp_dir, **kw)
 
-        # TODO default the following to true so that the cleanup is done
-        if rmtree_tmp:
-            rmtree(tmpdir)
-
-    def call(self, executable, sparc_path, env, working_dir, **kw):
+    def call(self, executable, sparc_path, env, working_dir, temp_dir, **kw):
         raise NotImplementedError
 
 
@@ -204,7 +195,7 @@ class SparcConvertUtility(SparcUtilityBase):
     binary_name = 'sparc-convert'
     sparc_filename = 'input.neon'
 
-    def call(self, executable, sparc_path, env, working_dir, **kw):
+    def call(self, executable, sparc_path, env, working_dir, temp_dir, **kw):
         call([executable, 'web-gl', sparc_path], env=env, cwd=working_dir)
 
 
@@ -218,13 +209,10 @@ class SparcDatasetToolsUtility(SparcUtilityBase):
     binary_name = 'create-scaffold-dataset'
     sparc_filename = 'input.argon'
 
-    def call(self, executable, sparc_path, env, working_dir, **kw):
-        # assuming it was created already
-        tmpdir = join(working_dir, 'src')
-
+    def call(self, executable, sparc_path, env, working_dir, temp_dir, **kw):
         # TODO if a custom settings_file be specified, load it from
         # dict(self.data)['settings_file'] and write it out.
-        # settings_json_path = join(tmpdir, 'mesh_generator-settings.json')
+        # settings_json_path = join(temp_dir, 'mesh_generator-settings.json')
 
         call(
             [executable, working_dir, settings_json_path, sparc_path],

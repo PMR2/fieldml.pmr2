@@ -256,7 +256,7 @@ class UtilsTestCase(unittest.TestCase):
 
     def test_sparc_utility_usage_without_binary(self):
         utility = zope.component.queryUtility(ISparcConvertUtility)
-        utility(self.testdir, None, '')
+        utility(self.testdir, self.testdir, None, '')
 
         self.assertIn(
             'unable to find the sparc-convert binary',
@@ -396,7 +396,7 @@ class UtilsTestCase(unittest.TestCase):
 
         # skip the neon file.
         fn = 'cubesquareline_sml.exf'
-        with open(join(out_root, 'scaffoldvuer', 'src', fn)) as fd:
+        with open(join(out_root, '_tmp_scaffoldvuer', fn)) as fd:
             self.assertEqual(fd.read(), neon_files[fn])
 
         # TODO try a test with testbrowser
@@ -469,7 +469,7 @@ class UtilsTestCase(unittest.TestCase):
             self.assertTrue(isdir(join(out_root, 'argon_sds_archive', dn)))
 
         for fn in ['cube.exf', 'heart.exfile']:
-            with open(join(out_root, 'argon_sds_archive', 'src', fn)) as fd:
+            with open(join(out_root, '_tmp_argon_sds_archive', fn)) as fd:
                 self.assertEqual(fd.read(), argon_files[fn])
 
         with open(join(
@@ -478,4 +478,5 @@ class UtilsTestCase(unittest.TestCase):
             contents = fd.read()
             result = loads(contents)
             self.assertTrue(isinstance(result, list))
-            self.assertEqual(len(result), 8)
+            # could be 7 or 8 files, depending on system configuration
+            self.assertIn(len(result), (7, 8))
