@@ -63,7 +63,7 @@ class ArgonSDSArchiveDownloadTool(object):
     Argon SDS Download link
     """
 
-    label = u'Argon SDS Archive'
+    label = u'SPARC Dataset Archive'
     suffix = '.zip'
     mimetype = 'application/zip'
 
