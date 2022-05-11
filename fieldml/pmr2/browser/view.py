@@ -12,6 +12,7 @@ from Acquisition import aq_inner
 from pmr2.app.settings.interfaces import IPMR2GlobalSettings
 from pmr2.app.exposure.interfaces import IExposureSourceAdapter
 from pmr2.app.exposure.browser.browser import ExposureFileViewBase
+from fieldml.pmr2.utility import _find, _create_zip
 
 
 class BaseZincViewer(ExposureFileViewBase):
@@ -128,11 +129,14 @@ class ScaffoldvuerView(ExposureFileViewBase):
     """
 
     index = ViewPageTemplateFile('scaffoldvuer.pt')
+    metadata_json = 'ArgonSceneExporterWebGL_metadata.json'
 
     def render(self):
         if not self.traverse_subpath:
             return super(ScaffoldvuerView, self).render()
+        return self.render_path()
 
+    def render_path(self):
         settings = zope.component.getUtility(IPMR2GlobalSettings)
         root = join(realpath(settings.dirOf(self.context)), self.__name__)
         target = realpath(join(root, *self.traverse_subpath))
@@ -142,3 +146,45 @@ class ScaffoldvuerView(ExposureFileViewBase):
             raise NotFound(self.context, self.context.title_or_id())
         with open(target) as fd:
             return fd.read()
+
+
+class ArgonSDSArchiveScaffoldvuerView(ScaffoldvuerView):
+
+    metadata_json = 'derivative/Scaffold/scaffold_metadata.json'
+
+    def render(self):
+        if self.traverse_subpath and self.traverse_subpath[0] == 'download':
+            settings = zope.component.getUtility(IPMR2GlobalSettings)
+            root = join(realpath(settings.dirOf(self.context)), self.__name__)
+            content = _create_zip(root)
+            self.request.response.setHeader('Content-Type', 'application/zip')
+            self.request.response.setHeader('Content-Length', len(content))
+            self.request.response.setHeader('Content-Disposition',
+                'attachment; filename="%s.sds_export.zip"' % self.context.id)
+            return content
+        return super(ArgonSDSArchiveScaffoldvuerView, self).render()
+
+
+class ArgonSDSArchiveView(ExposureFileViewBase):
+    """
+    The argon sds archive view
+    """
+
+    index = ViewPageTemplateFile('argon_sds_archive.pt')
+
+    def render(self):
+        settings = zope.component.getUtility(IPMR2GlobalSettings)
+        root = join(realpath(settings.dirOf(self.context)), self.__name__)
+        if not self.traverse_subpath:
+            self.files = sorted(item[0] for item in _find(root))
+            return super(ArgonSDSArchiveView, self).render()
+
+        if self.traverse_subpath[0] == 'download':
+            content = _create_zip(root)
+            self.request.response.setHeader('Content-Type', 'application/zip')
+            self.request.response.setHeader('Content-Length', len(content))
+            self.request.response.setHeader('Content-Disposition',
+                'attachment; filename="%s.sds_export.zip"' % self.context.id)
+            return content
+
+        raise NotFound(self.context, self.context.title_or_id())

@@ -54,3 +54,11 @@ class ScaffoldvuerNote(ExposureFileNoteBase):
     """
 
     zope.interface.implements(IScaffoldvuerNote)
+
+
+class ArgonSDSArchiveNote(ExposureFileNoteBase):
+    """
+    Scaffoldvuer note.
+    """
+
+    zope.interface.implements(IArgonSDSArchiveNote)

@@ -23,6 +23,13 @@ class ISettings(zope.interface.Interface):
         required=False,
     )
 
+    create_scaffold_dataset = zope.schema.TextLine(
+        title=u'Sparc Create Scaffold Dataset location',
+        description=u'The path to the create-scaffold-dataset binary.',
+        default=u'create-scaffold-dataset',
+        required=False,
+    )
+
 
 class IZincJSUtility(zope.interface.Interface):
     """
@@ -33,6 +40,12 @@ class IZincJSUtility(zope.interface.Interface):
 class ISparcConvertUtility(zope.interface.Interface):
     """
     The marker interface for the sparc-convert cli wrapper utility.
+    """
+
+
+class ISparcDatasetToolsUtility(zope.interface.Interface):
+    """
+    Marker interface for sparc-dataset-tools cli wrapper utility.
     """
 
 
@@ -116,4 +129,10 @@ class IScaffoldDescriptionNote(zope.interface.Interface):
 class IScaffoldvuerNote(zope.interface.Interface):
     """
     Scaffoldvuer note.
+    """
+
+
+class IArgonSDSArchiveNote(zope.interface.Interface):
+    """
+    Argon SDS Archive note.
     """

@@ -18,6 +18,23 @@ from fieldml.pmr2.interfaces import *
 from fieldml.pmr2.rdf import RdfExposureNoteHelper
 
 
+def make_view_dirs(settings, view):
+    root = settings.dirOf(view.context)
+    if not isdir(root):
+        makedirs(root)
+
+    working_dir = join(root, view.__name__)
+    temp_dir = join(root, '_tmp_' + view.__name__)
+    dirs = (working_dir, temp_dir,)
+
+    for d in dirs:
+        if exists(d):
+            rmtree(d)
+        makedirs(d)
+
+    return dirs
+
+
 class ZincViewerAnnotator(ExposureFileAnnotatorBase):
     zope.interface.implements(IExposureFileAnnotator)
     for_interface = IZincViewerNote
@@ -100,13 +117,7 @@ class ScaffoldvuerAnnotator(ExposureFileAnnotatorBase):
 
     def generate(self):
         settings = zope.component.queryUtility(IPMR2GlobalSettings)
-        root = settings.dirOf(self.context)
-        scaffold_root = join(root, self.__name__)
-        if not isdir(root):
-            makedirs(root)
-        if exists(scaffold_root):
-            rmtree(scaffold_root)
-        makedirs(scaffold_root)
+        live, tmp = make_view_dirs(settings, self)
 
         helper = zope.component.queryAdapter(
             self.context, IExposureSourceAdapter)
@@ -114,7 +125,30 @@ class ScaffoldvuerAnnotator(ExposureFileAnnotatorBase):
         storage = IStorage(exposure)
 
         utility = zope.component.queryUtility(ISparcConvertUtility)
-        utility(scaffold_root, storage, self.input)
+        utility(live, tmp, storage, self.input)
         return ()
 
 ScaffoldvuerAnnotatorFactory = named_factory(ScaffoldvuerAnnotator)
+
+
+class ArgonSDSArchiveAnnotator(ExposureFileAnnotatorBase):
+    zope.interface.implements(IExposureFileAnnotator)
+    for_interface = IArgonSDSArchiveNote
+    title = u'SPARC Dataset Archive (Argon) Annotator'
+    label = u'SPARC Dataset Archive (Argon)'
+
+    def generate(self):
+        settings = zope.component.queryUtility(IPMR2GlobalSettings)
+        root = settings.dirOf(self.context)
+        live, tmp = make_view_dirs(settings, self)
+
+        helper = zope.component.queryAdapter(
+            self.context, IExposureSourceAdapter)
+        exposure, workspace, path = helper.source()
+        storage = IStorage(exposure)
+
+        utility = zope.component.queryUtility(ISparcDatasetToolsUtility)
+        utility(live, tmp, storage, self.input)
+        return ()
+
+ArgonSDSArchiveAnnotatorFactory = named_factory(ArgonSDSArchiveAnnotator)

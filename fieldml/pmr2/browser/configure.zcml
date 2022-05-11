@@ -38,6 +38,13 @@
       permission="zope2.View"
       />
 
+  <browser:page
+      for="pmr2.app.exposure.interfaces.IExposureFile"
+      name="argon_sds_archive"
+      class=".view.ArgonSDSArchiveScaffoldvuerView"
+      permission="zope2.View"
+      />
+
   <browser:resourceDirectory
       name="fieldml.pmr2.css"
       directory="css"

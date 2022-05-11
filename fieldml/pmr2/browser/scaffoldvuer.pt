@@ -12,7 +12,7 @@
 
 <metal:slot metal:fill-slot="javascript_head_slot" 
     i18n:domain="fieldml.pmr2">
-  <script type="text/javascript" src="https://unpkg.com/vue"></script>
+  <script type="text/javascript" src="https://unpkg.com/vue@^2.6.10"></script>
   <script type="text/javascript"
       tal:attributes="src string:$portal_url/++resource++fieldml.pmr2.js/scaffoldvuer-wc.umd.min.js">
   </script>
@@ -30,7 +30,7 @@
     <h1>Scaffold Viewer</h1>
     <div id="MAPcorePortalArea">
     <scaffoldvuer-wc tal:attributes="
-        url string:${view/url_expr}/ArgonSceneExporterWebGL_metadata.json;
+        url string:${view/url_expr}/${view/metadata_json};
     "></scaffoldvuer-wc>
     </div>
     </div>

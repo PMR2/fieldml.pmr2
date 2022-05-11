@@ -3,8 +3,10 @@ import logging
 import os
 from StringIO import StringIO
 from json import loads
+from glob import glob
 from gzip import open as gzip_open
 from tempfile import mkdtemp
+from os.path import basename
 from os.path import dirname
 from os.path import isdir
 from os.path import join
@@ -33,8 +35,10 @@ from pmr2.app.annotation.interfaces import IExposureFileAnnotator
 from pmr2.testing.base import TestRequest
 
 from fieldml.pmr2.interfaces import ISparcConvertUtility
+from fieldml.pmr2.interfaces import ISparcDatasetToolsUtility
 from fieldml.pmr2.interfaces import IZincJSUtility
 from fieldml.pmr2.interfaces import ISettings
+from fieldml.pmr2.utility import SparcUtilityBase
 from fieldml.pmr2.utility import SparcConvertUtility
 from fieldml.pmr2.utility import ZincJSUtility
 from fieldml.pmr2.testing import layer
@@ -47,10 +51,15 @@ with gzip_open(join(dirname(__file__), 'input', 'test.ex2.gz')) as fd:
 
 
 neon_files = {}
+argon_files = {}
 
 for fn in ['CubeSquareLine.neon', 'cubesquareline_sml.exf']:
     with open(join(dirname(__file__), 'input', fn)) as fd:
         neon_files[fn] = fd.read()
+
+for fn in glob(join(dirname(__file__), 'input', 'argonFiles', '*')):
+    with open(fn) as fd:
+        argon_files[basename(fn)] = fd.read()
 
 
 class UtilsTestCase(unittest.TestCase):
@@ -247,12 +256,18 @@ class UtilsTestCase(unittest.TestCase):
 
     def test_sparc_utility_usage_without_binary(self):
         utility = zope.component.queryUtility(ISparcConvertUtility)
-        utility(self.testdir, None, '')
+        utility(self.testdir, self.testdir, None, '')
 
         self.assertIn(
             'unable to find the sparc-convert binary',
             self.stream.getvalue()
         )
+
+    def test_sparc_utility_base_get_paths(self):
+        base_utility = SparcUtilityBase()
+        argon_contents = argon_files['multiview.argon']
+        paths = base_utility.get_paths(argon_contents)
+        self.assertEqual(paths, {'cube.exf', 'heart.exfile'})
 
     def test_sparc_utility_get_paths(self):
         utility = zope.component.queryUtility(ISparcConvertUtility)
@@ -381,7 +396,7 @@ class UtilsTestCase(unittest.TestCase):
 
         # skip the neon file.
         fn = 'cubesquareline_sml.exf'
-        with open(join(out_root, 'scaffoldvuer', 'src', fn)) as fd:
+        with open(join(out_root, '_tmp_scaffoldvuer', fn)) as fd:
             self.assertEqual(fd.read(), neon_files[fn])
 
         # TODO try a test with testbrowser
@@ -408,3 +423,60 @@ class UtilsTestCase(unittest.TestCase):
         # this should break the view
         with self.assertRaises(ValueError):
             loads(view())
+
+    @unittest.skipIf(
+        'SPARC_DATASET_TOOL_BIN' not in os.environ,
+        'define SPARC_DATASET_TOOL_BIN environment variable to run full '
+        'integration test')
+    def test_sparc_dataset_tool_full(self):
+        # cube.exf  heart.exfile  multiview.argon
+        wid = 'argonfiles'
+        fid = 'multiview.argon'
+        pmr2_settings = zope.component.getUtility(IPMR2GlobalSettings)
+        pmr2_settings.repo_root = self.testdir
+
+        registry = zope.component.getUtility(IRegistry)
+        utility = zope.component.queryUtility(ISparcDatasetToolsUtility)
+        settings = registry.forInterface(
+            ISettings, prefix='fieldml.pmr2.settings')
+        settings.create_scaffold_dataset = os.environ[
+            'SPARC_DATASET_TOOL_BIN'].decode('utf8')
+
+        su = zope.component.getUtility(IStorageUtility, name='dummy_storage')
+        su._dummy_storage_data[wid] = [argon_files]
+
+        w = Workspace(wid)
+        w.storage = 'dummy_storage'
+        self.portal.workspace[wid] = w
+
+        exposure = Exposure(wid)
+        exposure.commit_id = u'0'
+        exposure.workspace = u'/plone/workspace/%s' % wid
+
+        self.portal.exposure[wid] = exposure
+        self.portal.exposure[wid][fid] = ExposureFile(fid)
+
+        context = self.portal.exposure[wid][fid]
+        request = TestRequest()
+        annotator = zope.component.getUtility(IExposureFileAnnotator,
+            name='argon_sds_archive')(context, request)
+        annotator(data=())
+
+        out_root = join(self.testdir, 'plone', 'exposure', wid, fid)
+        self.assertTrue(isdir(out_root))
+
+        for dn in ['derivative', 'docs', 'primary']:
+            self.assertTrue(isdir(join(out_root, 'argon_sds_archive', dn)))
+
+        for fn in ['cube.exf', 'heart.exfile']:
+            with open(join(out_root, '_tmp_argon_sds_archive', fn)) as fd:
+                self.assertEqual(fd.read(), argon_files[fn])
+
+        with open(join(
+                out_root, 'argon_sds_archive', 'derivative', 'Scaffold',
+                'scaffold_metadata.json')) as fd:
+            contents = fd.read()
+            result = loads(contents)
+            self.assertTrue(isinstance(result, list))
+            # could be 7 or 8 files, depending on system configuration
+            self.assertIn(len(result), (7, 8))

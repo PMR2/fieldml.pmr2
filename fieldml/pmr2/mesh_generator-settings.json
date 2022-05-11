@@ -1,0 +1,61 @@
+{
+    "generator_settings": {
+        "deleteElementRanges": "",
+        "displayAxes": true,
+        "displayElementAxes": false,
+        "displayElementNumbers": false,
+        "displayLines": true,
+        "displayLinesExterior": false,
+        "displayMarkerPoints": false,
+        "displayModelRadius": false,
+        "displayNodeDerivativeLabels": [
+            "D1",
+            "D2",
+            "D3"
+        ],
+        "displayNodeDerivatives": 0,
+        "displayNodeNumbers": false,
+        "displayNodePoints": false,
+        "displaySurfaces": true,
+        "displaySurfacesExterior": true,
+        "displaySurfacesTranslucent": true,
+        "displaySurfacesWireframe": false,
+        "modelCoordinatesField": "coordinates",
+        "scaffoldPackage": {
+            "_ScaffoldPackage": true,
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scaffoldSettings": {
+                "Number of elements 1": 1,
+                "Number of elements 2": 1,
+                "Number of elements 3": 1,
+                "Refine": false,
+                "Refine number of elements 1": 1,
+                "Refine number of elements 2": 1,
+                "Refine number of elements 3": 1,
+                "Use cross derivatives": false
+            },
+            "scaffoldTypeName": "3D Box 1",
+            "scale": [
+                1.5,
+                1.0,
+                1.0
+            ],
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    },
+    "segmentation_data_settings": {
+        "displayDataContours": true,
+        "displayDataMarkerNames": true,
+        "displayDataMarkerPoints": true,
+        "displayDataPoints": false,
+        "displayDataRadius": false
+    }
+}
