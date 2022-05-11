@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.11 - Released (2022-05-11)
+----------------------------
+
+* Include support for generation of SDS Archive from an argon file for
+  the SPARC project along with the presentation of the archive along
+  with the view.
+
 0.10 - Released (2021-10-26)
 ----------------------------
 
