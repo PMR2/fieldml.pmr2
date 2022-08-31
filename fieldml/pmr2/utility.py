@@ -214,7 +214,15 @@ class SparcDatasetToolsUtility(SparcUtilityBase):
         # dict(self.data)['settings_file'] and write it out.
         # settings_json_path = join(temp_dir, 'mesh_generator-settings.json')
 
+        # Provide the required environment variables to activate osmesa
+        osmesa_env = {}
+        osmesa_env.update(env)
+        osmesa_env.update({
+            'PYOPENGL_PLATFORM': 'osmesa',
+            'OC_EXPORTER_RENDERER': 'osmesa',
+        })
+
         call(
             [executable, working_dir, settings_json_path, sparc_path],
-            env=env, cwd=working_dir,
+            env=osmesa_env, cwd=working_dir,
         )
