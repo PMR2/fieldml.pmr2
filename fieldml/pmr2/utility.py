@@ -116,8 +116,8 @@ class SparcUtilityBase(object):
     executable_key = None
     binary_name = None
 
-    def get_paths(self, sparc_input, sparc_input_path):
-        def normalize(path):
+    def normalize_extract_paths(self, sparc_input, sparc_input_path):
+        def normalize_for_git(path):
             return posixpath.normpath(posixpath.join(
                 posixpath.dirname(
                     posixpath.join(posixpath.sep, sparc_input_path)),
@@ -126,20 +126,21 @@ class SparcUtilityBase(object):
 
         def get_region_model_sources(region):
             sources = region.get('Model', {}).get('Sources', [])
-            results = {
-                normalize(source['FileName']) for source in sources
-                if source['Type'] == 'FILE'
-            }
+            results = set()
+            for source in sources:
+                if source['Type'] == 'FILE':
+                    results.add(normalize_for_git(source['FileName']))
+                    source['FileName'] = source['FileName'].replace('\\', '/')
             for child in region.get('ChildRegions', []):
                 results.update(get_region_model_sources(child))
             return results
 
         try:
             sparc_doc = json.loads(sparc_input)
-            return get_region_model_sources(sparc_doc['RootRegion'])
+            return sparc_doc, get_region_model_sources(sparc_doc['RootRegion'])
             # watch out for absolute paths
         except (KeyError, TypeError, ValueError, AttributeError):
-            return set()
+            return {}, set()
 
     def extract_paths(self, rootdir, storage, paths):
         # write out the data for each of the referenced paths
@@ -177,14 +178,15 @@ class SparcUtilityBase(object):
             return
 
         # figure out what paths to extract
-        paths = self.get_paths(sparc_input, sparc_input_path)
+        sparc_input_json, paths = self.normalize_extract_paths(
+            sparc_input, sparc_input_path)
 
         # the sparc related file
         sparc_path = join(temp_dir, sparc_input_path)
         if not isdir(dirname(sparc_path)):
             os.makedirs(dirname(sparc_path))
         with open(sparc_path, 'w') as fd:
-            fd.write(sparc_input)
+            fd.write(json.dumps(sparc_input_json))
 
         self.extract_paths(temp_dir, storage, paths)
 

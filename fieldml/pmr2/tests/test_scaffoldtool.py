@@ -1,4 +1,5 @@
 import unittest
+import json
 import logging
 import os
 from StringIO import StringIO
@@ -266,12 +267,13 @@ class UtilsTestCase(unittest.TestCase):
     def test_sparc_utility_base_get_paths(self):
         base_utility = SparcUtilityBase()
         argon_contents = argon_files['multiview.argon']
-        paths = base_utility.get_paths(argon_contents, 'root.argon')
+        content, paths = base_utility.normalize_extract_paths(
+            argon_contents, 'root.argon')
         self.assertEqual(paths, {'cube.exf', 'heart.exfile'})
 
     def test_sparc_utility_get_paths(self):
         utility = zope.component.queryUtility(ISparcConvertUtility)
-        paths = utility.get_paths("""
+        output, paths = utility.normalize_extract_paths("""
         {
           "RootRegion": {
             "ChildRegions": [
@@ -356,7 +358,7 @@ class UtilsTestCase(unittest.TestCase):
 
     def test_sparc_utility_get_windows_paths(self):
         utility = zope.component.queryUtility(ISparcConvertUtility)
-        paths = utility.get_paths(r"""
+        output, paths = utility.normalize_extract_paths(r"""
         {
           "RootRegion": {
             "ChildRegions": [
@@ -423,6 +425,9 @@ class UtilsTestCase(unittest.TestCase):
             'source1.exnode', 'source1.exelem',
             'src/source2.exnode', 'src/source2.exelem',
         })
+        output_s = json.dumps(output)
+        self.assertNotIn('\\', output_s)
+        self.assertIn('../source', output_s)
 
         su = zope.component.getUtility(IStorageUtility, name='dummy_storage')
         su._dummy_storage_data['fake'] = [{
