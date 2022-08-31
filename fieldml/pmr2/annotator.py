@@ -125,7 +125,7 @@ class ScaffoldvuerAnnotator(ExposureFileAnnotatorBase):
         storage = IStorage(exposure)
 
         utility = zope.component.queryUtility(ISparcConvertUtility)
-        utility(live, tmp, storage, self.input)
+        utility(live, tmp, storage, self.input, path)
         return ()
 
 ScaffoldvuerAnnotatorFactory = named_factory(ScaffoldvuerAnnotator)
@@ -148,7 +148,7 @@ class ArgonSDSArchiveAnnotator(ExposureFileAnnotatorBase):
         storage = IStorage(exposure)
 
         utility = zope.component.queryUtility(ISparcDatasetToolsUtility)
-        utility(live, tmp, storage, self.input)
+        utility(live, tmp, storage, self.input, path)
         return ()
 
 ArgonSDSArchiveAnnotatorFactory = named_factory(ArgonSDSArchiveAnnotator)

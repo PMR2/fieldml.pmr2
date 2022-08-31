@@ -256,7 +256,7 @@ class UtilsTestCase(unittest.TestCase):
 
     def test_sparc_utility_usage_without_binary(self):
         utility = zope.component.queryUtility(ISparcConvertUtility)
-        utility(self.testdir, self.testdir, None, '')
+        utility(self.testdir, self.testdir, None, '', '')
 
         self.assertIn(
             'unable to find the sparc-convert binary',
@@ -266,7 +266,7 @@ class UtilsTestCase(unittest.TestCase):
     def test_sparc_utility_base_get_paths(self):
         base_utility = SparcUtilityBase()
         argon_contents = argon_files['multiview.argon']
-        paths = base_utility.get_paths(argon_contents)
+        paths = base_utility.get_paths(argon_contents, 'root.argon')
         self.assertEqual(paths, {'cube.exf', 'heart.exfile'})
 
     def test_sparc_utility_get_paths(self):
@@ -332,7 +332,92 @@ class UtilsTestCase(unittest.TestCase):
             ]
           }
         }
-        """)
+        """, 'root.argon')
+
+        self.assertEqual(paths, {
+            'source1.exnode', 'source1.exelem',
+            'src/source2.exnode', 'src/source2.exelem',
+        })
+
+        su = zope.component.getUtility(IStorageUtility, name='dummy_storage')
+        su._dummy_storage_data['fake'] = [{
+            'source1.exnode': 'source1.exnode',
+            'src/source2.exnode': 'source2.exnode',
+            'source1.exelem': 'source1.exelem',
+            'src/source2.exelem': 'source2.exelem',
+        }]
+        w = Workspace('fake')
+        w.storage = 'dummy_storage'
+        storage = IStorage(w)
+
+        utility.extract_paths(self.testdir, storage, paths)
+        with open(join(self.testdir, 'src', 'source2.exelem')) as fd:
+            self.assertEqual(fd.read(), 'source2.exelem')
+
+    def test_sparc_utility_get_windows_paths(self):
+        utility = zope.component.queryUtility(ISparcConvertUtility)
+        paths = utility.get_paths(r"""
+        {
+          "RootRegion": {
+            "ChildRegions": [
+              {
+                "ChildRegions": [
+                  {
+                    "ChildRegions": [
+                      {
+                        "Model": {
+                          "Sources": [
+                            {
+                              "FileName": "..\\source1.exnode",
+                              "RegionName": "/source1",
+                              "Type": "FILE"
+                            },
+                            {
+                              "FileName": "..\\source1.exelem",
+                              "RegionName": "/source1",
+                              "Type": "FILE"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Model": {
+                          "Sources": [
+                            {
+                              "FileName": "..\\src\\source2.exnode",
+                              "RegionName": "/source2",
+                              "Type": "FILE"
+                            },
+                            {
+                              "FileName": "..\\src\\source2.exelem",
+                              "RegionName": "/source2",
+                              "Type": "FILE"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "Model": {
+                      "Sources": [
+                        {
+                          "FileName": "..\\source1.exnode",
+                          "RegionName": "/source1",
+                          "Type": "FILE"
+                        },
+                        {
+                          "FileName": "..\\source1.exelem",
+                          "RegionName": "/source1",
+                          "Type": "FILE"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        """, 'generated/output.json')
 
         self.assertEqual(paths, {
             'source1.exnode', 'source1.exelem',

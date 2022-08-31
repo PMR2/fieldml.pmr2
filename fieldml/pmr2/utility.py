@@ -1,4 +1,5 @@
 import os
+import posixpath
 import json
 import zipfile
 from io import BytesIO
@@ -115,11 +116,18 @@ class SparcUtilityBase(object):
     executable_key = None
     binary_name = None
 
-    def get_paths(self, sparc_input):
+    def get_paths(self, sparc_input, sparc_input_path):
+        def normalize(path):
+            return posixpath.normpath(posixpath.join(
+                posixpath.dirname(
+                    posixpath.join(posixpath.sep, sparc_input_path)),
+                path.replace('\\', '/'),
+            ))[1:]
+
         def get_region_model_sources(region):
             sources = region.get('Model', {}).get('Sources', [])
             results = {
-                source['FileName'] for source in sources
+                normalize(source['FileName']) for source in sources
                 if source['Type'] == 'FILE'
             }
             for child in region.get('ChildRegions', []):
@@ -131,7 +139,7 @@ class SparcUtilityBase(object):
             return get_region_model_sources(sparc_doc['RootRegion'])
             # watch out for absolute paths
         except (KeyError, TypeError, ValueError, AttributeError):
-            return []
+            return set()
 
     def extract_paths(self, rootdir, storage, paths):
         # write out the data for each of the referenced paths
@@ -146,7 +154,8 @@ class SparcUtilityBase(object):
                 fd.write(data)
 
     def __call__(
-            self, working_dir, temp_dir, storage, sparc_input, **kw):
+            self, working_dir, temp_dir, storage, sparc_input,
+            sparc_input_path, **kw):
         registry = zope.component.getUtility(IRegistry)
         try:
             settings = registry.forInterface(ISettings, prefix=prefix)
@@ -168,10 +177,12 @@ class SparcUtilityBase(object):
             return
 
         # figure out what paths to extract
-        paths = self.get_paths(sparc_input)
+        paths = self.get_paths(sparc_input, sparc_input_path)
 
         # the sparc related file
-        sparc_path = join(temp_dir, self.sparc_filename)
+        sparc_path = join(temp_dir, sparc_input_path)
+        if not isdir(dirname(sparc_path)):
+            os.makedirs(dirname(sparc_path))
         with open(sparc_path, 'w') as fd:
             fd.write(sparc_input)
 
