@@ -147,7 +147,7 @@ class SparcUtilityBase(object):
         for path in paths:
             # assume data can only be returned if the path is a proper
             # partial path
-            data = storage.file(path)
+            data = storage.resolve_file(path)
             fullpath = join(rootdir, path)
             if not isdir(dirname(fullpath)):
                 os.makedirs(dirname(fullpath))
