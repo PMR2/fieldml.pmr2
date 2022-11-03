@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.12.0'
+version = '0.12.1'
 
 setup(name='fieldml.pmr2',
       version=version,

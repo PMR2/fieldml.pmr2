@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.12.1 - Released (2022-11-03)
+------------------------------
+
+* Updated upstream dependencies
+* Using the storage.resolve_file method to handle paths from subrepos
+  aka embedded workspaces.
+
 0.12.0 - Released (2022-08-31)
 ------------------------------
 
